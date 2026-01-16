@@ -1,0 +1,29 @@
+#!/bin/sh
+set -eu
+
+# Staged C/C++ files only (added/copied/modified)
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$' || true)
+
+[ -z "$files" ] && exit 0
+
+fail=0
+
+for f in $files; do
+  [ -f "$f" ] || continue
+
+  staged="$(git show ":$f")"
+  formatted="$(printf "%s" "$staged" | clang-format -style=file)"
+
+  if [ "$staged" != "$formatted" ]; then
+    echo "clang-format mismatch: $f"
+    fail=1
+  fi
+done
+
+if [ "$fail" -ne 0 ]; then
+  echo "Commit rejected: some C/C++ files are not formatted with clang-format (style: LLVM via .clang-format)."
+  echo "Fix: clang-format -i <file> && git add <file>"
+  exit 1
+fi
+
+exit 0
