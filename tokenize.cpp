@@ -11,10 +11,12 @@
 using DocPair_t = Document_t::value_type;
 
 void add_token(Document_t& doc, Dictionary& dict, const std::string& token) {
+  TermId_t tokenId{};
   if (!dict.contains(token)) {
-    dict.add(token);
+    tokenId = dict.add(token);
+  } else {
+    tokenId = dict[token];
   }
-  TermId_t tokenId = dict[token];
   auto it = std::find_if(doc.begin(), doc.end(),
       [&tokenId](const DocPair_t& p) -> bool {
       return p.first == tokenId;
