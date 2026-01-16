@@ -1,8 +1,7 @@
 #include "utils.hpp"
-
 #include <fstream>
 
-std::vector<std::string> tokenize(const std::string& file_path) {
+std::vector<std::string> tokenize(const std::string &file_path) {
   std::vector<std::string> tokens{};
   if (std::ifstream is{file_path}; is.is_open()) {
     is >> std::noskipws;

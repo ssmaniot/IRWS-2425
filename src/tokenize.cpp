@@ -1,8 +1,8 @@
-#include <algorithm>
-#include <fstream>
-
+#include "tokenize.hpp"
 #include "dictionary.hpp"
 #include "utils.hpp"
+#include <algorithm>
+#include <fstream>
 
 // Store documents as (TermId, TF) pairs
 // using TermId_t = uint32_t;
@@ -10,17 +10,16 @@
 
 using DocPair_t = Document_t::value_type;
 
-void add_token(Document_t& doc, Dictionary& dict, const std::string& token) {
+void add_token(Document_t &doc, Dictionary &dict, const std::string &token) {
   TermId_t tokenId{};
   if (!dict.contains(token)) {
     tokenId = dict.add(token);
   } else {
     tokenId = dict[token];
   }
-  auto it = std::find_if(doc.begin(), doc.end(),
-      [&tokenId](const DocPair_t& p) -> bool {
-      return p.first == tokenId;
-      });
+  auto it = std::find_if(
+      doc.begin(), doc.end(),
+      [&tokenId](const DocPair_t &p) -> bool { return p.first == tokenId; });
   if (it != doc.end()) {
     it->second += 1;
   } else {
@@ -28,7 +27,7 @@ void add_token(Document_t& doc, Dictionary& dict, const std::string& token) {
   }
 }
 
-Document_t tokenize(Dictionary& dict, const std::string& file_path) {
+Document_t tokenize(Dictionary &dict, const std::string &file_path) {
   std::ifstream is{file_path};
   if (!is.is_open()) {
     throw std::runtime_error("ERROR: could not open '" + file_path + "'");
@@ -50,8 +49,10 @@ Document_t tokenize(Dictionary& dict, const std::string& file_path) {
   if (!token.empty()) {
     add_token(doc, dict, token);
   }
-  std::sort(doc.begin(), doc.end(), [](const DocPair_t& p1, const DocPair_t& p2) -> bool {
-      return p1.first < p2.first || (p1.first == p2.first && p1.second < p2.second);
-      });
+  std::sort(doc.begin(), doc.end(),
+            [](const DocPair_t &p1, const DocPair_t &p2) -> bool {
+              return p1.first < p2.first ||
+                     (p1.first == p2.first && p1.second < p2.second);
+            });
   return doc;
 }
