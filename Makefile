@@ -1,7 +1,7 @@
 CXX      := g++
 CXXFLAGS := -std=c++20 -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer
 TARGET   := main
-SRC      := main.cpp tokenize.cpp dictionary.cpp
+SRC      := main.cpp corpus.cpp tokenize.cpp dictionary.cpp
 
 .PHONY: all clean
 
