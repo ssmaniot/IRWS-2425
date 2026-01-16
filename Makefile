@@ -1,13 +1,17 @@
 CXX      := g++
-CXXFLAGS := -std=c++20 -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer
+CXXFLAGS := -std=c++20 -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude
 TARGET   := main
-SRC      := main.cpp corpus.cpp tokenize.cpp dictionary.cpp
-#
+
+SRCDIR   := src
+
 # Output directory for object and dependency files
 BUILDDIR := build
 
+# Source files
+SRC := $(wildcard $(SRCDIR)/*.cpp)
+
 # Derived lists
-OBJ := $(SRC:%.cpp=$(BUILDDIR)/%.o)
+OBJ := $(SRC:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
 DEP := $(OBJ:.o=.d)
 
 .PHONY: all clean compdb
@@ -24,12 +28,10 @@ $(TARGET): $(OBJ)
 # Compile step (+ auto header deps)
 # -MMD: write dependencies excluding system headers
 # -MP : add phony targets for headers (avoids errors if headers are removed)
-$(BUILDDIR)/%.o: %.cpp | $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
-
 # Ensure build directory exists
-$(BUILDDIR):
+$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	mkdir -p $(BUILDDIR)
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
 # Include generated dependency files if they exist
 -include $(DEP)
