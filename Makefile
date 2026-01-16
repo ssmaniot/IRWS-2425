@@ -10,9 +10,12 @@ BUILDDIR := build
 OBJ := $(SRC:%.cpp=$(BUILDDIR)/%.o)
 DEP := $(OBJ:.o=.d)
 
-.PHONY: all clean
+.PHONY: all clean compdb
 
 all: $(TARGET)
+
+compdb:
+	bear -- make clean all
 
 # Link step
 $(TARGET): $(OBJ)
