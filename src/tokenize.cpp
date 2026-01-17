@@ -3,27 +3,27 @@
 #include "utils.hpp"
 #include <algorithm>
 #include <fstream>
-
-// Store documents as (TermId, TF) pairs
-// using TermId_t = uint32_t;
-// using Document_t = std::vector<std::pair<TermId_t, int>>;
+#include <unordered_map>
 
 using DocPair_t = Document_t::value_type;
+using FreqCounter_t = std::unordered_map<DocId_t, int>;
 
-void add_token(Document_t &doc, Dictionary &dict, const std::string &token) {
+void add_token(FreqCounter_t &freq_counter, Dictionary &dict,
+               const std::string &token) {
   TermId_t tokenId{};
   if (!dict.contains(token)) {
+
     tokenId = dict.add(token);
   } else {
     tokenId = dict[token];
   }
   auto it = std::find_if(
-      doc.begin(), doc.end(),
+      freq_counter.begin(), freq_counter.end(),
       [&tokenId](const DocPair_t &p) -> bool { return p.first == tokenId; });
-  if (it != doc.end()) {
-    it->second += 1;
+  if (it != freq_counter.end()) {
+    it->second++;
   } else {
-    doc.emplace_back(tokenId, 1);
+    freq_counter.emplace(tokenId, 1);
   }
 }
 
@@ -34,12 +34,15 @@ Document_t tokenize(Dictionary &dict, const std::string &file_path) {
   }
   is >> std::noskipws;
   Document_t doc{};
+  FreqCounter_t freq_counter{};
+  int num_terms = 0;
   unsigned char ch{};
   std::string token{};
   while (is >> ch) {
     if (std::isspace(ch)) {
       if (!token.empty()) {
-        add_token(doc, dict, token);
+        add_token(freq_counter, dict, token);
+        ++num_terms;
         token.clear();
       }
       continue;
@@ -47,7 +50,13 @@ Document_t tokenize(Dictionary &dict, const std::string &file_path) {
     token.push_back(ch);
   }
   if (!token.empty()) {
-    add_token(doc, dict, token);
+    add_token(freq_counter, dict, token);
+    ++num_terms;
+  }
+  for (const auto &[termId, count] : freq_counter) {
+    float termFrequency =
+        static_cast<float>(count) / static_cast<float>(num_terms);
+    doc.emplace_back(termId, termFrequency);
   }
   std::sort(doc.begin(), doc.end(),
             [](const DocPair_t &p1, const DocPair_t &p2) -> bool {
