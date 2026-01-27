@@ -1,5 +1,5 @@
 CXX      := g++
-CXXFLAGS := -std=c++20 -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude
+CXXFLAGS := -std=c++20 -O3 -march=native -pedantic -Wall -Wextra -fsanitize=address,undefined -fno-omit-frame-pointer -Iinclude
 TARGET   := main
 
 SRCDIR   := src
